@@ -83,7 +83,7 @@ def startMain():
         # Print out input
         print('Value: ' + soundInput)
 
-		# Round value to closest integer
+	# Round value to closest integer
         val = int(round(float(soundInput)))
 
         # Control flow to on/off LED if soundInput exceeds or falls below 450
