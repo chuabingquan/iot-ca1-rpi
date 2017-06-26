@@ -105,3 +105,4 @@ def startMain():
 while True:
 	if manual == False:
 		startMain()
+
