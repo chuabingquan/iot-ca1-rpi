@@ -68,43 +68,38 @@ def ledOFF():
 	led.off()
 	print('LED is off.')
 
-# Run infinite loop to constantly get inputs from FC-109 Microphone Amplifier via MCP3008 ADC
+# Constantly get inputs from FC-109 Microphone Amplifier via MCP3008 ADC
 def startMain():
-    while True:
-        # If manual control is True, terminate loop
-        if manual == True:
-            break;
+    # Read FC-109 input and format to 2 decimal places
+    soundInput = format(float(adc.value * 1024), '.2f')
 
-        # Read FC-109 input and format to 2 decimal places
-        soundInput = format(float(adc.value * 1024), '.2f')
+    ledStatus = False;
 
-        ledStatus = False;
+    # Print out input
+    print('Value: ' + soundInput)
 
-        # Print out input
-        print('Value: ' + soundInput)
+	# Round value to closest integer
+    val = int(round(float(soundInput)))
 
-		# Round value to closest integer
-        val = int(round(float(soundInput)))
+    # Control flow to on/off LED if soundInput exceeds or falls below 450
+    if val > 450:
+        ledON()
+        ledStatus = True
+        print('Sound Input > 450, LED On')
+        sleep(5)
+    else:
+        ledOFF()
+        ledStatus = False
+        print('Sound Input < 450, LED Off')
 
-        # Control flow to on/off LED if soundInput exceeds or falls below 450
-        if val > 450:
-            ledON()
-            ledStatus = True
-            print('Sound Input > 450, LED On')
-            sleep(5)
-        else:
-            ledOFF()
-            ledStatus = False
-            print('Sound Input < 450, LED Off')
+    # Publish input to MQTT Broker
+    # Topic is 'soundInput'
+    print('Publishing to MQTT Broker...')
+    publish.single('soundInput', '{ "soundValue": ' + soundInput + ', "ledStatus": ' + str(ledStatus).lower() + ' }', hostname = mqttBrokerUrl)
+    print('Published to MQTT Broker!\n')
 
-        # Publish input to MQTT Broker
-        # Topic is 'soundInput'
-        print('Publishing to MQTT Broker...')
-        publish.single('soundInput', '{ "soundValue": ' + soundInput + ', "ledStatus": ' + str(ledStatus).lower() + ' }', hostname = mqttBrokerUrl)
-        print('Published to MQTT Broker!\n')
-
-        # Sleep/Wait for 3 seconds before looping again
-        sleep(3)
+    # Sleep/Wait for 3 seconds before looping again
+    sleep(3)
 
 # Run program in infinte loop if manual control is not activated
 while True:
